@@ -22,8 +22,10 @@ namespace CGL {
     // NOTE: You are not required to implement proper supersampling for points and lines
     // It is sufficient to use the same color for all supersamples of a pixel for points and lines (not triangles)
 
-
-    sample_buffer[y * width + x] = c;
+    //    sample_buffer[y * width + x] = c;
+    rgb_framebuffer_target[3 * (y * width + x)] = (unsigned char)(c.r * 255);
+    rgb_framebuffer_target[3 * (y * width + x) + 1] = (unsigned char)(c.g * 255);
+    rgb_framebuffer_target[3 * (y * width + x) + 2] = (unsigned char)(c.b * 255);
 
   }
 
@@ -120,16 +122,6 @@ namespace CGL {
 
 
     // TODO: Task 2: Update to implement super-sampled rasterization
-//    for (int i = 0; i <= 5; i++){
-//        int sx = (int)floor(pts[i]);
-//        int sy = (int)floor(pts[i+1]);
-//
-//        // check bounds
-//        if (sx < 0 || sx >= width) return;
-//        if (sy < 0 || sy >= height) return;
-//
-//        fill_pixel(sx, sy, color);
-//    }
 
   return;
 
