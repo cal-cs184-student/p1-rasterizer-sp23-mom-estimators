@@ -90,7 +90,18 @@ namespace CGL {
   }
 
     // TODO: Task 2: Update to implement super-sampled rasterization
+    for (int i = 0; i <= 5; i++){
+        int sx = (int)floor(pts[i]);
+        int sy = (int)floor(pts[i+1]);
 
+        // check bounds
+        if (sx < 0 || sx >= width) return;
+        if (sy < 0 || sy >= height) return;
+
+        fill_pixel(sx, sy, color);
+    }
+
+  return;
 
 
   }
