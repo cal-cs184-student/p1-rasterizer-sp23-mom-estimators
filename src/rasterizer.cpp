@@ -67,39 +67,69 @@ namespace CGL {
   }
 
   // Rasterize a triangle.
+
+  // CREATED FOR TASK 1: indicator function
+  // check if a point is inside the triangle
+  // maggie's shitty code that doesn't make sense
+  bool is_point_in_triangle(float x0 , float y0, float x1, float y1, float x2, float y2, float ptx, float pty) {
+      // three line test
+      float pts[3][2] = {{x0, y0}, {x1, y1} , {x2, y2}};
+      float dx[] = {abs(x1-x0), abs(x2-x0), abs(x2-x1)};
+      float dy[] = {abs(y1-y0), abs(y2-y0), abs(y2-y1)};
+      float l1[] = {0, 0, 0};
+      float l2[] = {0, 0, 0};
+      float l3[] = {0, 0, 0};
+
+      for (int i = 0; i < sizeof(dx); i++) {
+          if (i == 0) {
+              l1[0] = -1 * dy[0]; // A_i x
+              l1[1] = dx[0]; // B_i y
+              l1[2] = pts[i][0] * dy[i] - pts[i][1] * dx[i]; // C_i
+          };
+          if (i == 1) {
+              l2[0] = -1 * dy[0]; // A_i
+              l2[1] = dx[0]; // B_i
+              l2[2] = pts[i][0] * dy[i] - pts[i][1] * dx[i]; // C_i
+          };
+          if (i == 2) {
+              l3[0] = -1 * dy[0]; // A_i
+              l3[1] = dx[0]; // B_i
+              l3[2] = pts[i][0] * dy[i] - pts[i][1] * dx[i]; // C_i
+          };
+      }
+      for (int i = 0; i < 3; i++) {
+          if ((l1[0] * ptx + l1[1] * pty + l1[2]) > 0 && (l2[0] * ptx + l2[1] * pty + l2[2]) > 0 && (l3[0] * ptx + l3[1] * pty + l3[2]) > 0) {
+              return 1;
+          }
+      }
+      return 0;
+  }
+
   void RasterizerImp::rasterize_triangle(float x0, float y0,
     float x1, float y1,
     float x2, float y2,
     Color color) {
     // TODO: Task 1: Implement basic triangle rasterization here, no supersampling
-    float pts[] = {x0, y0, x1, y1, x2, y2};
-    float edges[] = { (y1-y0)/(x1-x0), (y2-y0)/(x2-x0), (y2-y1)/(x1-x0)};
-    float dpt[] = {1, edges[0], edges[1], edges[2]};
-    int steep[] = {abs(edges[0]) > 1, abs(edges[1]) > 1, abs(edges[2]) > 1};
-    for (int i = 0; i < sizeof(edges); i++) {
-        if (steep[i]) {
-            dpt[i] = x1 == x0 ? (y1 - y0) / abs(y1 - y0) : dpt[i] / abs(dpt[i]);
+    for (int x = 0; x < width; x++) {
+        for (int y = 0; y < height; y++) {
+            if (is_point_in_triangle(x0, y0,x1, y1, x2, y2,x+0.5,y+0.5)) {
+                rasterize_point(x+0.5, y+0.5, color);
+            }
         }
     }
 
-  while (floor(pts[0]) <= floor(x1) && abs(pts[1] - y0) <= abs(y1 - y0)) {
-      rasterize_line(pts[0], pts[1], pts[2], pts[3], color);
-      rasterize_line(pts[0], pts[1], pts[4], pts[5], color);
-      rasterize_line(pts[2], pts[3], pts[4], pts[5], color);
-      pts[0] += dpt[0]; pts[1] += dpt[1]; pts[2] += dpt[2];
-  }
 
     // TODO: Task 2: Update to implement super-sampled rasterization
-    for (int i = 0; i <= 5; i++){
-        int sx = (int)floor(pts[i]);
-        int sy = (int)floor(pts[i+1]);
-
-        // check bounds
-        if (sx < 0 || sx >= width) return;
-        if (sy < 0 || sy >= height) return;
-
-        fill_pixel(sx, sy, color);
-    }
+//    for (int i = 0; i <= 5; i++){
+//        int sx = (int)floor(pts[i]);
+//        int sy = (int)floor(pts[i+1]);
+//
+//        // check bounds
+//        if (sx < 0 || sx >= width) return;
+//        if (sy < 0 || sy >= height) return;
+//
+//        fill_pixel(sx, sy, color);
+//    }
 
   return;
 
