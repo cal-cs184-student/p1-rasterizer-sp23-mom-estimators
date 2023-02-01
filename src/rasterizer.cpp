@@ -24,6 +24,7 @@ namespace CGL {
 
 
     sample_buffer[y * width + x] = c;
+
   }
 
   // Rasterize a point: simple example to help you start familiarizing
@@ -71,6 +72,22 @@ namespace CGL {
     float x2, float y2,
     Color color) {
     // TODO: Task 1: Implement basic triangle rasterization here, no supersampling
+    float pts[] = {x0, y0, x1, y1, x2, y2};
+    float edges[] = { (y1-y0)/(x1-x0), (y2-y0)/(x2-x0), (y2-y1)/(x1-x0)};
+    float dpt[] = {1, edges[0], edges[1], edges[2]};
+    int steep[] = {abs(edges[0]) > 1, abs(edges[1]) > 1, abs(edges[2]) > 1};
+    for (int i = 0; i < sizeof(edges); i++) {
+        if (steep[i]) {
+            dpt[i] = x1 == x0 ? (y1 - y0) / abs(y1 - y0) : dpt[i] / abs(dpt[i]);
+        }
+    }
+
+  while (floor(pts[0]) <= floor(x1) && abs(pts[1] - y0) <= abs(y1 - y0)) {
+      rasterize_line(pts[0], pts[1], pts[2], pts[3], color);
+      rasterize_line(pts[0], pts[1], pts[4], pts[5], color);
+      rasterize_line(pts[2], pts[3], pts[4], pts[5], color);
+      pts[0] += dpt[0]; pts[1] += dpt[1]; pts[2] += dpt[2];
+  }
 
     // TODO: Task 2: Update to implement super-sampled rasterization
 
