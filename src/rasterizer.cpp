@@ -70,79 +70,18 @@ namespace CGL {
 
   // Rasterize a triangle.
 
-  // CREATED FOR TASK 1: indicator function
-  // check if a point is inside the triangle
-  // maggie's shitty code that doesn't make sense
-//   this is a little buggy but almost works?
-  bool is_point_in_triangle(float x0 , float y0, float x1, float y1, float x2, float y2, float ptx, float pty) {
-      // three line test
-      float pts[3][2] = {{x0, y0}, {x1, y1} , {x2, y2}};
-      float dx[] = {abs(x1-x0), abs(x2-x0), abs(x2-x1)};
-      float dy[] = {abs(y1-y0), abs(y2-y0), abs(y2-y1)};
-      float l1[] = {0, 0, 0};
-      float l2[] = {0, 0, 0};
-      float l3[] = {0, 0, 0};
-
-//      std::cout << "hi" << std::endl;
-
-      for (int i = 0; i < 3; i++) {
-          if (i == 0) {
-              l1[0] = -1 * dy[0]; // A_i x
-              l1[1] = dx[0]; // B_i y
-              l1[2] = pts[i][0] * dy[i] - pts[i][1] * dx[i]; // C_i
-          };
-          if (i == 1) {
-              l2[0] = -1 * dy[0]; // A_i
-              l2[1] = dx[0]; // B_i
-              l2[2] = pts[i][0] * dy[i] - pts[i][1] * dx[i]; // C_i
-          };
-          if (i == 2) {
-              l3[0] = -1 * dy[0]; // A_i
-              l3[1] = dx[0]; // B_i
-              l3[2] = pts[i][0] * dy[i] - pts[i][1] * dx[i]; // C_i
-          };
-      }
-
-      if ((l1[0] * ptx + l1[1] * pty + l1[2]) >= 0 && (l2[0] * ptx + l2[1] * pty + l2[2]) >= 0 && (l3[0] * ptx + l3[1] * pty + l3[2]) >= 0) {
-          return 1;
-      }
-      return 0;
+  // Created for Task 1
+  float L(float x, float y, float P1x, float P1y, float P2x, float P2y) {
+      return (x - P2x) * (P1y - P2y) - (y - P2y) * (P1x - P2x);
   }
 
-//  using the cross product / normal vectors to determine if it is inside the triangle
-  bool is_in_triangle(float x0, float x1, float y0, float y1, float x2, float y2, float x, float y) {
-      float x_coords[] = {x0, x1, x2};
-      float y_coords[] = {y0, y1, y2};
-//      float crosses[3];
-//
-//      for (int i = 0; i < 3; i++) {
-//          Vector2D edge_vec = Vector2D(x_coords[i], y_coords[i]);
-//          Vector2D pt_vec = Vector2D(x, y);
-//          crosses[i] = edge_vec.x * pt_vec.y - pt_vec.y * edge_vec.x;
-//
-//
-//      }
-//      std::cout << crosses << std::endl;
-//
-//      if ((crosses[0] < 0 && crosses[1] < 0 && crosses[2] < 0) || (crosses[0] > 0 && crosses[1] > 0 && crosses[2] > 0)) {
-//          return 1;
-//      }
-//      return 0;
-//A: 0, B: 1
-//    Vector2D edges[] = {Vector2D(x0-x1,y0-y1), Vector2D(x0-x2,y0-y2), Vector2D(x1-x2, y1-y2)};
-    Vector2D l_norm[] = {Vector2D(y0-y1, x1-x0), Vector2D(y0-y2, x2-x0), Vector2D(y1-y2, x2-x1)};
-    bool line_check[3];
-
-    for (int i = 0; i < 3; i++) {
-        Vector2D norm = l_norm[i];
-        Vector2D pt = Vector2D(abs(x_coords[i]-x), y_coords[i]-y);
-        line_check[i] = norm.x * pt.x + norm.y + pt.y;
-        if ((norm.x * pt.x + norm.y + pt.y) >= 0) {
-            return 0;
-        }
-    }
-    return 1;
-
+  // Created for Task 1
+  bool is_inside_triangle(float P1x, float P1y, float P2x, float P2y, float P3x, float P3y, float x, float y) {
+      float l1, l2, l3;
+      l1 = L(x, y, P1x, P1y, P2x, P2y);
+      l2 = L(x, y, P2x, P2y, P3x, P3y);
+      l3 = L(x, y, P3x, P3y, P1x, P1y);
+      return ((l1 >= 0) && (l2 >= 0) && (l3 >= 0)) || ((l1 < 0) && (l2 < 0) && (l3 < 0));
   }
 
   void RasterizerImp::rasterize_triangle(float x0, float y0,
@@ -159,7 +98,7 @@ namespace CGL {
 
     for (int x = xmin; x <= xmax; x++) {
         for (int y = ymin; y <= ymax; y++) {
-            if (is_in_triangle(x0, y0,x1, y1, x2, y2,x+0.5,y+0.5)) {
+            if (is_inside_triangle(x0, y0,x1, y1, x2, y2,x+0.5,y+0.5)) {
                 rasterize_point(x+0.5, y+0.5, color);
             }
         }
