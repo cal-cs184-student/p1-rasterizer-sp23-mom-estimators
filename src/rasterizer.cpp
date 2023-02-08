@@ -134,7 +134,7 @@ namespace CGL {
     float x1, float y1, Color c1,
     float x2, float y2, Color c2)
   {
-    // TODO: Task 4: Rasterize the triangle, calculating barycentric coordinates and using them to interpolate vertex colors across the triangle
+    // Done: Task 4: Rasterize the triangle, calculating barycentric coordinates and using them to interpolate vertex colors across the triangle
     // Hint: You can reuse code from rasterize_triangle
 
     // Min and max edges for trying sample points
@@ -168,10 +168,6 @@ namespace CGL {
           }
       }
 
-
-      // Done: Task 2: Update to implement super-sampled rasterization
-
-
       return;
 
   }
@@ -182,11 +178,49 @@ namespace CGL {
     float x2, float y2, float u2, float v2,
     Texture& tex)
   {
-    // TODO: Task 5: Fill in the SampleParams struct and pass it to the tex.sample function.
+    // Done: Task 5: Fill in the SampleParams struct and pass it to the tex.sample function.
     // TODO: Task 6: Set the correct barycentric differentials in the SampleParams struct.
     // Hint: You can reuse code from rasterize_triangle/rasterize_interpolated_color_triangle
 
+    // Min and max edges for trying sample points
+      int xmin = floor(min(min(x0, x1), x2));
+      int xmax = floor(max(max(x0, x1), x2));
+      int ymin = floor(min(min(y0, y1), y2));
+      int ymax = floor(max(max(y0, y1), y2));
 
+      // Sample rate
+      float sqrt_rate = sqrt(sample_rate);
+      float sample_size = 1.0 / sqrt_rate;
+      float center = sample_size / 2.0;
+
+      // Iterate through pixels and rasterize
+      for (int x = xmin; x <= xmax; x++) {
+          for (int y = ymin; y <= ymax; y++) {
+              for (float i = 0; i < sqrt_rate; i++) {
+                  for (float j = 0; j < sqrt_rate; j++) {
+                      float px = x + (i * sample_size) + center;
+                      float py = y + (j * sample_size) + center;
+                      if (is_inside_triangle(x0, y0, x1, y1, x2, y2, px, py)) {
+                          float alpha, beta, gamma;
+                          alpha = ((py - y1) * (x2 - x1) - (px - x1) * (y2 - y1)) / ((y0 - y1) * (x2 - x1) - (x0 - x1) * (y2 - y1));
+                          beta = ((py - y2) * (x0 - x2) - (px - x2) * (y0 - y2)) / ((y1 - y2) * (x0 - x2) - (x1 - x2) * (y0 - y2));
+                          gamma = 1 - alpha - beta;
+
+                          SampleParams sp;
+                          sp.p_uv = Vector2D(alpha * u0 + beta * u1 + gamma * u2, alpha * v0 + beta * v1 + gamma * v2);
+                          sp.p_dx_uv = Vector2D((x0 - x1)/(u0 - u1), (x0 - x1) / (v0 - v1));
+                          sp.p_dy_uv = Vector2D((y0 - y1) / (u0 - u1), (y0 - y1) / (v0 - v1));
+                          sp.psm = psm;
+                          sp.lsm = lsm;
+
+                          Color c;
+                          c = tex.sample(sp);
+                          fill_pixel((x * sqrt_rate + i), (y * sqrt_rate + j), c);
+                      }
+                  }
+              }
+          }
+      }
 
 
   }

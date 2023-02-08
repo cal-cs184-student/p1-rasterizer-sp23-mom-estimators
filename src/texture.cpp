@@ -2,16 +2,23 @@
 #include "CGL/color.h"
 
 #include <cmath>
+#include <iostream>
 #include <algorithm>
+using namespace std;
 
 namespace CGL {
 
   Color Texture::sample(const SampleParams& sp) {
     // TODO: Task 6: Fill this in.
 
-
-// return magenta for invalid level
-    return Color(1, 0, 1);
+      if (sp.psm == P_NEAREST) {
+          return sample_nearest(sp.p_uv, 0);
+      } else if (sp.psm == P_LINEAR) {
+          return sample_bilinear(sp.p_uv, 0);
+      }
+      else {
+          return Color(1, 0, 1);
+      }
   }
 
   float Texture::get_level(const SampleParams& sp) {
@@ -26,26 +33,77 @@ namespace CGL {
     return Color(&texels[tx * 3 + ty * width * 3]);
   }
 
+  Color lerp(float t, Color a, Color b)
+  {
+      return a + t * (b + a*(-1));
+  }
+
   Color Texture::sample_nearest(Vector2D uv, int level) {
-    // TODO: Task 5: Fill this in.
+    // Done: Task 5: Fill this in.
     auto& mip = mipmap[level];
+    int width, height;
+    width = mip.width;
+    height = mip.height;
 
+    float x = uv.x * width;
+    float y = uv.y * height;
 
+    x = x >= width ? width - 1 : x;
+    y = y >= height ? height - 1 : y;
 
+    int tx = (int)floor(x);
+    int ty = (int)floor(y);
 
-    // return magenta for invalid level
-    return Color(1, 0, 1);
+    return mip.get_texel(tx, ty);
   }
 
   Color Texture::sample_bilinear(Vector2D uv, int level) {
-    // TODO: Task 5: Fill this in.
+    // Done: Task 5: Fill this in.
     auto& mip = mipmap[level];
 
+    int width, height;
+    width = mip.width;
+    height = mip.height;
 
+    float x = uv.x * width;
+    float y = uv.y * height;
 
+    x = x >= width ? width - 1 : x;
+    y = y >= height ? height - 1 : y;
 
-    // return magenta for invalid level
-    return Color(1, 0, 1);
+    int tx = (int)floor(x);
+    int ty = (int)floor(y);
+    float dx = x - tx;
+    float dy = y - ty;
+
+    Color u00, u01, u10, u11, ret;
+
+    if (tx + 1 >= width && ty + 1 >= height) {
+        ret = mip.get_texel(tx, ty);
+    }
+    else if (tx + 1 >= width) {
+        u00 = mip.get_texel(tx, ty);
+        u01 = mip.get_texel(tx, ty + 1);
+        ret = lerp(dy, u00, u01);
+    }
+    else if (ty + 1 >= height) {
+        u00 = mip.get_texel(tx, ty);
+        u10 = mip.get_texel(tx + 1, ty);
+        ret = lerp(dx, u00, u10);
+    }
+    else {
+        u00 = mip.get_texel(tx, ty);
+        u01 = mip.get_texel(tx, ty + 1);
+        u10 = mip.get_texel(tx + 1, ty);
+        u11 = mip.get_texel(tx + 1, ty + 1);
+
+        Color u0 = lerp(dx, u00, u10);
+        Color u1 = lerp(dx, u01, u11);
+        ret = lerp(dy, u0, u1);
+    }
+
+    return ret;
+
   }
 
 
