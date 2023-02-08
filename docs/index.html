@@ -78,38 +78,38 @@
         <h3 align="middle">Part 2: Antialiasing triangles</h3>
 
         <p>
-            For supersampling, we create a sample_buffer that is of size (width * sqrt(sample_rate)) x (height * sqrt(sample_rate)). In other words, if the original image is 100x100, and we sample at a sample_rate of 4, then the sample_buffer would be of size 200x200. 
-            The buffer is stored as a 1D vector of Color values. For each pixel, we sample sample_rate times at uniformly distributed locations in each pixel, and store it into the sample buffer. Lines and pixels are also modified to store sample_rate items of the same color into the sample_buffer, as to scale lines and points up properly. 
+            For supersampling, we create a sample_buffer that is of size (width * sqrt(sample_rate)) x (height * sqrt(sample_rate)). In other words, if the original image is 100x100, and we sample at a sample_rate of 4, then the sample_buffer would be of size 200x200.
+            The buffer is stored as a 1D vector of Color values. For each pixel, we sample sample_rate times at uniformly distributed locations in each pixel, and store it into the sample buffer. Lines and pixels are also modified to store sample_rate items of the same color into the sample_buffer, as to scale lines and points up properly.
             Every time we sample at a different rate, we clear both the frame buffer and the sample buffer.
-            Then, when we resolve the sample buffer to the frame buffer, we average down the sqrt(sample_rate) x  sqrt(sample_rate) grid of sample values that are related to each output pixel. The average values, stored in a Color object, are then converted to 8-bit values for each of the RGB components and stored in the frame buffer. 
+            Then, when we resolve the sample buffer to the frame buffer, we average down the sqrt(sample_rate) x  sqrt(sample_rate) grid of sample values that are related to each output pixel. The average values, stored in a Color object, are then converted to 8-bit values for each of the RGB components and stored in the frame buffer.
 
         </p>
 
         <div align="middle">
-      <table style="width=100%">
-        <tr>
-          <td>
-            <img src="images/task2_1.png" align="middle" width="400px"/>
-            <figcaption align="middle">basic/test4.svg with sample rate 1.</figcaption>
-          </td>
-          <td>
-            <img src="images/task2_2.png" align="middle" width="400px"/>
-            <figcaption align="middle">basic/test4.svg with sample rate 4.</figcaption>
-          </td>
-        </tr>
-        <br>
-        <tr>
-          <td>
-            <img src="images/task2_3.png" align="middle" width="400px"/>
-            <figcaption align="middle">basic/test4.svg with sample rate 9.</figcaption>
-          </td>
-          <td>
-            <img src="images/task2_4.png" align="middle" width="400px"/>
-            <figcaption align="middle">basic/test4.svg with sample rate 16.</figcaption>
-          </td>
-        </tr>
-      </table>
-    </div>
+            <table style="width=100%">
+                <tr>
+                    <td>
+                        <img src="images/task2_1.png" align="middle" width="400px" />
+                        <figcaption align="middle">basic/test4.svg with sample rate 1.</figcaption>
+                    </td>
+                    <td>
+                        <img src="images/task2_2.png" align="middle" width="400px" />
+                        <figcaption align="middle">basic/test4.svg with sample rate 4.</figcaption>
+                    </td>
+                </tr>
+                <br />
+                <tr>
+                    <td>
+                        <img src="images/task2_3.png" align="middle" width="400px" />
+                        <figcaption align="middle">basic/test4.svg with sample rate 9.</figcaption>
+                    </td>
+                    <td>
+                        <img src="images/task2_4.png" align="middle" width="400px" />
+                        <figcaption align="middle">basic/test4.svg with sample rate 16.</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
         <h3 align="middle">Part 3: Transforms</h3>
 
@@ -119,6 +119,17 @@
 
         <h3 align="middle">Part 4: Barycentric coordinates</h3>
 
+        <img src="images/task4_triangle.png" align="middle" width="400px" />
+        <figcaption align="middle">Barycentric coordinates.</figcaption>
+
+        <p>
+            Barycentric coordinates are a way to interpolate between points. In the image above, notice how each of the vertices of the triangle are a different color; red, green, and blue, respectively. The colors inside the triangle blend together.
+            At each point within the triangle, the color of the pixel is a weighted average of the colors in the three vertices. The closer the distance of the pixel is to each vertex, the higher the weighting of the color of the vertex.
+            Mathematically, the color is alpha * C1 + beta * C2 + gamma * C3, where C1, C2, and C3 are the colors in each of the three vertices, and alpha, beta, and gamma are the normalized distances to vertex 1, 2, and 3 from the pixel, respectively (normalized so that alpha + beta + gamma = 1).
+        </p>
+
+        <img src="images/task4_wheel.png" align="middle" width="400px" />
+        <figcaption align="middle">basic/test7.svg with default viewing parameters and sample rate 1.</figcaption>
 
         <h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
 
