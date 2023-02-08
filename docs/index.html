@@ -29,68 +29,108 @@
 
 <br><br>
 
-<div>
+    <div>
 
-<h2 align="middle">Overview</h2>
-<p>Give a high-level overview of what you implemented in this project. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the project.</p>
+        <h2 align="middle">Overview</h2>
+        <p>Give a high-level overview of what you implemented in this project. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the project.</p>
 
-<h2 align="middle">Section I: Rasterization</h2>
+        <h2 align="middle">Section I: Rasterization</h2>
 
-<h3 align="middle">Part 1: Rasterizing single-color triangles</h3>
+        <h3 align="middle">Part 1: Rasterizing single-color triangles</h3>
 
-<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
+        <p>
+            Triangles are rasterized using the three line check. We iterate through every pixel within
+            the bounding box of the triangle (we don't check every pixel in the framebuffer; therefore this algorithm is no worse than one that checks each sample within the bounding box of the triangle).
+            For each pixel, we calculate the sign of the cross product of the vector from the pixel to one of the corners of the triangle, and the vector of one of the sides of the triangle the corner is attached to.
+            We repeat this for all three sides. If the sign of the cross product for all three sides is the same, then we know the pixel is inside the triangle, and we can rasterize the pixel. Otherwise, we don't.
+        </p>
+        <img src="images/task1_test4.png" align="middle" width="400px" />
+        <figcaption align="middle">Here is a PNG screenshot of basic/test4.svg with the default viewing parameters and with the pixel inspector centered on an interesting part of the scene.</figcaption>
 
-<div align="middle">
-  <table style="width=100%">
-    <tr>
-      <td>
-        <img src="images/image1.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
-      </td>
-      <td>
-        <img src="images/image2.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
-      </td>
-    </tr>
-    <br>
-    <tr>
-      <td>
-        <img src="images/image3.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
-      </td>
-      <td>
-        <img src="images/image4.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
-      </td>
-    </tr>
-  </table>
-</div>
-
-
-<h3 align="middle">Part 2: Antialiasing triangles</h3>
-
-
-
-<h3 align="middle">Part 3: Transforms</h3>
-
-
-
-<h2 align="middle">Section II: Sampling</h2>
-
-<h3 align="middle">Part 4: Barycentric coordinates</h3>
+        <!--<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>-->
+        <!--<div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/image1.png" align="middle" width="400px"/>
+            <figcaption align="middle">Caption goes here.</figcaption>
+          </td>
+          <td>
+            <img src="images/image2.png" align="middle" width="400px"/>
+            <figcaption align="middle">Caption goes here.</figcaption>
+          </td>
+        </tr>
+        <br>
+        <tr>
+          <td>
+            <img src="images/image3.png" align="middle" width="400px"/>
+            <figcaption align="middle">Caption goes here.</figcaption>
+          </td>
+          <td>
+            <img src="images/image4.png" align="middle" width="400px"/>
+            <figcaption align="middle">Caption goes here.</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>-->
 
 
-<h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
+        <h3 align="middle">Part 2: Antialiasing triangles</h3>
+
+        <p>
+            For supersampling, we create a sample_buffer that is of size (width * sqrt(sample_rate)) x (height * sqrt(sample_rate)). In other words, if the original image is 100x100, and we sample at a sample_rate of 4, then the sample_buffer would be of size 200x200. 
+            The buffer is stored as a 1D vector of Color values. For each pixel, we sample sample_rate times at uniformly distributed locations in each pixel, and store it into the sample buffer. Lines and pixels are also modified to store sample_rate items of the same color into the sample_buffer, as to scale lines and points up properly. 
+            Every time we sample at a different rate, we clear both the frame buffer and the sample buffer.
+            Then, when we resolve the sample buffer to the frame buffer, we average down the sqrt(sample_rate) x  sqrt(sample_rate) grid of sample values that are related to each output pixel. The average values, stored in a Color object, are then converted to 8-bit values for each of the RGB components and stored in the frame buffer. 
+
+        </p>
+
+        <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/task2_1.png" align="middle" width="400px"/>
+            <figcaption align="middle">basic/test4.svg with sample rate 1.</figcaption>
+          </td>
+          <td>
+            <img src="images/task2_2.png" align="middle" width="400px"/>
+            <figcaption align="middle">basic/test4.svg with sample rate 4.</figcaption>
+          </td>
+        </tr>
+        <br>
+        <tr>
+          <td>
+            <img src="images/task2_3.png" align="middle" width="400px"/>
+            <figcaption align="middle">basic/test4.svg with sample rate 9.</figcaption>
+          </td>
+          <td>
+            <img src="images/task2_4.png" align="middle" width="400px"/>
+            <figcaption align="middle">basic/test4.svg with sample rate 16.</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+        <h3 align="middle">Part 3: Transforms</h3>
 
 
-<h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
+
+        <h2 align="middle">Section II: Sampling</h2>
+
+        <h3 align="middle">Part 4: Barycentric coordinates</h3>
+
+
+        <h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
+
+
+        <h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
 
 
 
-<h2 align="middle">Section III: Art Competition</h2>
-<p>If you are not participating in the optional art competition, don't worry about this section!</p>
+        <h2 align="middle">Section III: Art Competition</h2>
+        <p>If you are not participating in the optional art competition, don't worry about this section!</p>
 
-<h3 align="middle">Part 7: Draw something interesting!</h3>
+        <h3 align="middle">Part 7: Draw something interesting!</h3>
 
-</body>
+    </div></body>
 </html>
