@@ -9,24 +9,70 @@ using namespace std;
 namespace CGL {
 
   Color Texture::sample(const SampleParams& sp) {
-    // TODO: Task 6: Fill this in.
+    // Done: Task 6: Fill this in.
 
-      if (sp.psm == P_NEAREST) {
-          return sample_nearest(sp.p_uv, 0);
-      } else if (sp.psm == P_LINEAR) {
-          return sample_bilinear(sp.p_uv, 0);
+      if (sp.lsm == L_ZERO) {
+          if (sp.psm == P_NEAREST) {
+              return sample_nearest(sp.p_uv, 0);
+          }
+          else if (sp.psm == P_LINEAR) {
+              return sample_bilinear(sp.p_uv, 0);
+          }
+          else {
+              return Color(1, 0, 1);
+          }
+      }
+      else if (sp.lsm == L_NEAREST) {
+          int level = get_level(sp);
+          if (sp.psm == P_NEAREST) {
+              return sample_nearest(sp.p_uv, level);
+          }
+          else if (sp.psm == P_LINEAR) {
+              return sample_bilinear(sp.p_uv, level);
+          }
+          else {
+              return Color(1, 0, 1);
+          }
+      }
+      else if (sp.lsm == L_LINEAR) {
+          float level = get_level(sp);
+          int floor_level = (int)floor(level);
+          int ceil_level = floor_level + 1;
+
+          if (sp.psm == P_NEAREST) {
+              return (level - floor_level) * sample_nearest(sp.p_uv, floor_level) + (ceil_level - level) * sample_nearest(sp.p_uv, ceil_level);
+          }
+          else if (sp.psm == P_LINEAR) {
+              return (level - floor_level) * sample_bilinear(sp.p_uv, floor_level) + (ceil_level - level) * sample_bilinear(sp.p_uv, ceil_level);
+          }
+          else {
+              return Color(1, 0, 1);
+          }
       }
       else {
           return Color(1, 0, 1);
       }
+
+
   }
 
   float Texture::get_level(const SampleParams& sp) {
-    // TODO: Task 6: Fill this in.
+    // Done: Task 6: Fill this in.
 
 
+      Vector2D diff_x = sp.p_dx_uv - sp.p_uv;
+      Vector2D diff_y = sp.p_dy_uv - sp.p_uv;
 
-    return 0;
+      Vector2D diff_x_scaled = Vector2D(diff_x.x * width, diff_x.y * height);
+      Vector2D diff_y_scaled = Vector2D(diff_y.x * width, diff_y.y * height);
+
+      float L = max(sqrt(diff_x_scaled.x * diff_x_scaled.x + diff_x_scaled.y * diff_x_scaled.y), sqrt(diff_y_scaled.x * diff_y_scaled.x + diff_y_scaled.y * diff_y_scaled.y));
+      float D = log2f(L);
+
+      D = D < 0 ? 0 : D;
+      D = D > kMaxMipLevels ? kMaxMipLevels : D;
+
+    return D;
   }
 
   Color MipLevel::get_texel(int tx, int ty) {

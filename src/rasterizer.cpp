@@ -179,7 +179,7 @@ namespace CGL {
     Texture& tex)
   {
     // Done: Task 5: Fill in the SampleParams struct and pass it to the tex.sample function.
-    // TODO: Task 6: Set the correct barycentric differentials in the SampleParams struct.
+    // Done: Task 6: Set the correct barycentric differentials in the SampleParams struct.
     // Hint: You can reuse code from rasterize_triangle/rasterize_interpolated_color_triangle
 
     // Min and max edges for trying sample points
@@ -201,15 +201,35 @@ namespace CGL {
                       float px = x + (i * sample_size) + center;
                       float py = y + (j * sample_size) + center;
                       if (is_inside_triangle(x0, y0, x1, y1, x2, y2, px, py)) {
+                          SampleParams sp;
                           float alpha, beta, gamma;
+
                           alpha = ((py - y1) * (x2 - x1) - (px - x1) * (y2 - y1)) / ((y0 - y1) * (x2 - x1) - (x0 - x1) * (y2 - y1));
                           beta = ((py - y2) * (x0 - x2) - (px - x2) * (y0 - y2)) / ((y1 - y2) * (x0 - x2) - (x1 - x2) * (y0 - y2));
                           gamma = 1 - alpha - beta;
-
-                          SampleParams sp;
                           sp.p_uv = Vector2D(alpha * u0 + beta * u1 + gamma * u2, alpha * v0 + beta * v1 + gamma * v2);
-                          sp.p_dx_uv = Vector2D((x0 - x1)/(u0 - u1), (x0 - x1) / (v0 - v1));
-                          sp.p_dy_uv = Vector2D((y0 - y1) / (u0 - u1), (y0 - y1) / (v0 - v1));
+
+                          if (px + 1 >= width) {
+                              sp.p_dx_uv = sp.p_uv;
+                          }
+                          else {
+                              alpha = ((py - y1) * (x2 - x1) - ((px + 1) - x1) * (y2 - y1)) / ((y0 - y1) * (x2 - x1) - (x0 - x1) * (y2 - y1));
+                              beta = ((py - y2) * (x0 - x2) - ((px + 1) - x2) * (y0 - y2)) / ((y1 - y2) * (x0 - x2) - (x1 - x2) * (y0 - y2));
+                              gamma = 1 - alpha - beta;
+                              sp.p_dx_uv = Vector2D(alpha * u0 + beta * u1 + gamma * u2, alpha * v0 + beta * v1 + gamma * v2);
+                          }
+
+                          if (py + 1 >= height) {
+                              sp.p_dy_uv = sp.p_uv;
+                          }
+                          else {
+                              alpha = (((py + 1) - y1) * (x2 - x1) - (px - x1) * (y2 - y1)) / ((y0 - y1) * (x2 - x1) - (x0 - x1) * (y2 - y1));
+                              beta = (((py + 1) - y2) * (x0 - x2) - (px - x2) * (y0 - y2)) / ((y1 - y2) * (x0 - x2) - (x1 - x2) * (y0 - y2));
+                              gamma = 1 - alpha - beta;
+                              sp.p_dy_uv = Vector2D(alpha * u0 + beta * u1 + gamma * u2, alpha * v0 + beta * v1 + gamma * v2);
+                          }
+
+
                           sp.psm = psm;
                           sp.lsm = lsm;
 
