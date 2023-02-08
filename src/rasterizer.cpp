@@ -22,10 +22,7 @@ namespace CGL {
     // NOTE: You are not required to implement proper supersampling for points and lines
     // It is sufficient to use the same color for all supersamples of a pixel for points and lines (not triangles)
 
-        sample_buffer[y * width + x] = c;
-//    rgb_framebuffer_target[3 * (y * width + x)] = (unsigned char)(c.r * 255);
-//    rgb_framebuffer_target[3 * (y * width + x) + 1] = (unsigned char)(c.g * 255);
-//    rgb_framebuffer_target[3 * (y * width + x) + 2] = (unsigned char)(c.b * 255);
+    sample_buffer[y * width * sqrt(sample_rate) + x] = c;
 
   }
 
@@ -41,7 +38,15 @@ namespace CGL {
     if (sx < 0 || sx >= width) return;
     if (sy < 0 || sy >= height) return;
 
-    fill_pixel(sx, sy, color);
+    // fill in supersampled buffer
+    float sqrt_rate = sqrt(sample_rate);
+    for (float i = 0; i < sqrt_rate; i++) {
+        for (float j = 0; j < sqrt_rate; j++) {
+            fill_pixel((sx * sqrt_rate + i), (sy * sqrt_rate + j), color);
+        }
+    }
+
+    //fill_pixel(sx, sy, color);
     return;
   }
 
@@ -89,17 +94,28 @@ namespace CGL {
     float x2, float y2,
     Color color) {
 
-    // TODO: Task 1: Implement basic triangle rasterization here, no supersampling
+    // Min and max edges for trying sample points
     int xmin = floor(min(min(x0, x1), x2));
     int xmax = floor(max(max(x0, x1), x2));
     int ymin = floor(min(min(y0, y1), y2));
     int ymax = floor(max(max(y0, y1), y2));
 
+    // Sample rate
+    float sqrt_rate = sqrt(sample_rate);
+    float sample_size = 1.0 / sqrt_rate;
+    float center = sample_size / 2.0;
 
+    // Iterate through pixels and rasterize
     for (int x = xmin; x <= xmax; x++) {
         for (int y = ymin; y <= ymax; y++) {
-            if (is_inside_triangle(x0, y0,x1, y1, x2, y2,x+0.5,y+0.5)) {
-                rasterize_point(x+0.5, y+0.5, color);
+            for (float i = 0; i < sqrt_rate; i++) {
+                for (float j = 0; j < sqrt_rate; j++) {
+                    float px = x + (i * sample_size) + center;
+                    float py = y + (j * sample_size) + center;
+                    if (is_inside_triangle(x0, y0, x1, y1, x2, y2, px, py)) {
+                        fill_pixel((x * sqrt_rate + i), (y * sqrt_rate + j), color);
+                    }
+                }
             }
         }
     }
@@ -141,26 +157,28 @@ namespace CGL {
   }
 
   void RasterizerImp::set_sample_rate(unsigned int rate) {
-    // TODO: Task 2: You may want to update this function for supersampling support
+    // Done: Task 2: You may want to update this function for supersampling support
 
     this->sample_rate = rate;
 
 
-    this->sample_buffer.resize(width * height, Color::White);
+    this->sample_buffer.resize(width * height * rate, Color::White);
+    clear_buffers();
   }
 
 
   void RasterizerImp::set_framebuffer_target(unsigned char* rgb_framebuffer,
     size_t width, size_t height)
   {
-    // TODO: Task 2: You may want to update this function for supersampling support
+    // Done: Task 2: You may want to update this function for supersampling support
 
     this->width = width;
     this->height = height;
     this->rgb_framebuffer_target = rgb_framebuffer;
 
 
-    this->sample_buffer.resize(width * height, Color::White);
+    //this->sample_buffer.resize(width * height, Color::White);
+    set_sample_rate(this->sample_rate);
   }
 
 
@@ -177,11 +195,30 @@ namespace CGL {
   //
   void RasterizerImp::resolve_to_framebuffer() {
     // TODO: Task 2: You will likely want to update this function for supersampling support
+    // TODO: Print size of sample_buffer and width and height
 
+     std::cout << "width: " << width << std::endl;
+     std::cout << "height: " << height << std::endl;
+     std::cout << "sample_rate: " << this->sample_rate << std::endl;
+     std::cout << "sample_buffer size: " << sample_buffer.size() << '\n';
+
+     float rate = sqrt(sample_rate);
 
     for (int x = 0; x < width; ++x) {
       for (int y = 0; y < height; ++y) {
-        Color col = sample_buffer[y * width + x];
+
+          // Average high-res sample values
+          Color col = Color::Black;
+          for (int i = 0; i < rate; i++) {
+              for (int j = 0; j < rate; j++) {
+                  if (x == 0 && y == 300) {
+                      std::cout << sample_buffer[(rate * y + j) * width * sqrt(sample_rate) + (rate * x + i)] << std::endl;
+                  }
+                  col += sample_buffer[(rate * y + j) * width * sqrt(sample_rate) + (rate * x + i)];
+              }
+          }
+          col *= (1.0 / sample_rate);
+        
 
         for (int k = 0; k < 3; ++k) {
           this->rgb_framebuffer_target[3 * (y * width + x) + k] = (&col.r)[k] * 255;
