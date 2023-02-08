@@ -121,7 +121,7 @@ namespace CGL {
     }
 
 
-    // TODO: Task 2: Update to implement super-sampled rasterization
+    // Done: Task 2: Update to implement super-sampled rasterization
 
 
   return;
@@ -137,7 +137,42 @@ namespace CGL {
     // TODO: Task 4: Rasterize the triangle, calculating barycentric coordinates and using them to interpolate vertex colors across the triangle
     // Hint: You can reuse code from rasterize_triangle
 
+    // Min and max edges for trying sample points
+      int xmin = floor(min(min(x0, x1), x2));
+      int xmax = floor(max(max(x0, x1), x2));
+      int ymin = floor(min(min(y0, y1), y2));
+      int ymax = floor(max(max(y0, y1), y2));
 
+      // Sample rate
+      float sqrt_rate = sqrt(sample_rate);
+      float sample_size = 1.0 / sqrt_rate;
+      float center = sample_size / 2.0;
+
+      // Iterate through pixels and rasterize
+      for (int x = xmin; x <= xmax; x++) {
+          for (int y = ymin; y <= ymax; y++) {
+              for (float i = 0; i < sqrt_rate; i++) {
+                  for (float j = 0; j < sqrt_rate; j++) {
+                      float px = x + (i * sample_size) + center;
+                      float py = y + (j * sample_size) + center;
+                      if (is_inside_triangle(x0, y0, x1, y1, x2, y2, px, py)) {
+                          float alpha, beta, gamma;
+                          alpha = ((py - y1) * (x2 - x1) - (px - x1) * (y2 - y1)) / ((y0 - y1) * (x2 - x1) - (x0 - x1) * (y2 - y1));
+                          beta = ((py - y2) * (x0 - x2) - (px - x2) * (y0 - y2)) / ((y1 - y2) * (x0 - x2) - (x1 - x2) * (y0 - y2));
+                          gamma = 1 - alpha - beta;
+                          Color c = alpha * c0 + beta * c1 + gamma * c2;
+                          fill_pixel((x * sqrt_rate + i), (y * sqrt_rate + j), c);
+                      }
+                  }
+              }
+          }
+      }
+
+
+      // Done: Task 2: Update to implement super-sampled rasterization
+
+
+      return;
 
   }
 
@@ -194,13 +229,8 @@ namespace CGL {
   // pixels from the supersample buffer data.
   //
   void RasterizerImp::resolve_to_framebuffer() {
-    // TODO: Task 2: You will likely want to update this function for supersampling support
-    // TODO: Print size of sample_buffer and width and height
+    // Done: Task 2: You will likely want to update this function for supersampling support
 
-     std::cout << "width: " << width << std::endl;
-     std::cout << "height: " << height << std::endl;
-     std::cout << "sample_rate: " << this->sample_rate << std::endl;
-     std::cout << "sample_buffer size: " << sample_buffer.size() << '\n';
 
      float rate = sqrt(sample_rate);
 
@@ -211,9 +241,6 @@ namespace CGL {
           Color col = Color::Black;
           for (int i = 0; i < rate; i++) {
               for (int j = 0; j < rate; j++) {
-                  if (x == 0 && y == 300) {
-                      std::cout << sample_buffer[(rate * y + j) * width * sqrt(sample_rate) + (rate * x + i)] << std::endl;
-                  }
                   col += sample_buffer[(rate * y + j) * width * sqrt(sample_rate) + (rate * x + i)];
               }
           }
