@@ -134,11 +134,11 @@
         <h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
 
         <p>
-            Pixel sampling is a method to sample the pixel value at any given point in an image or texture, given pixel values of points near the point we want to calculate. 
-            Nearest neighbour sampling simply copies the pixel value of the closest known point. Bilinear sampling takes the four closest pixels to the point we want to calculate, and linearly interpolates the point to find the corresponding pixel value. 
-            The closer the point is to one of the four pixels, the more similar the value of that point will be to the value of that pixel. 
-            We implemented both sampling methods for texture mapping by first mapping the screen coordinates to the texture coordinates. Then, we find the closest known pixel value(s) to the texture coordinate we want to calculate. 
-            Nearest neighbour sampling copies the pixel value of the closest known point on the texture. Bilinear sampling calculates the linear interpolation value of the four closest pixels in the texture. 
+            Pixel sampling is a method to sample the pixel value at any given point in an image or texture, given pixel values of points near the point we want to calculate.
+            Nearest neighbour sampling simply copies the pixel value of the closest known point. Bilinear sampling takes the four closest pixels to the point we want to calculate, and linearly interpolates the point to find the corresponding pixel value.
+            The closer the point is to one of the four pixels, the more similar the value of that point will be to the value of that pixel.
+            We implemented both sampling methods for texture mapping by first mapping the screen coordinates to the texture coordinates. Then, we find the closest known pixel value(s) to the texture coordinate we want to calculate.
+            Nearest neighbour sampling copies the pixel value of the closest known point on the texture. Bilinear sampling calculates the linear interpolation value of the four closest pixels in the texture.
         </p>
 
         <div align="middle">
@@ -167,15 +167,51 @@
             </table>
         </div>
 
-        <p>The difference between sampling at a rate of 1 versus 16 is that the images with a higher sample rate have smoother edges, with nearest pixels blurred together. 
-        Even at sample rate 1, bilinear sampling produces a smoother output. This is because each (u, v) point is calculated using a Barycentric average of the closest pixels, as opposed to just copying the pixel value of the nearest pixel, which would produce more extreme and higher variance outputs.
-        When the image has high frequency, there will be a larger difference between the two methods. Nearest neighbour sampling will take the value closes to the point, but because of the high frequency, the actual point value may not be the same as the value of the closest neighbour. 
-        Bilinear sampling will average the value over the four closest pixels, which may blur the high frequency, but result in a smoother, lower variance output.
+        <p>
+            The difference between sampling at a rate of 1 versus 16 is that the images with a higher sample rate have smoother edges, with nearest pixels blurred together.
+            Even at sample rate 1, bilinear sampling produces a smoother output. This is because each (u, v) point is calculated using a Barycentric average of the closest pixels, as opposed to just copying the pixel value of the nearest pixel, which would produce more extreme and higher variance outputs.
+            When the image has high frequency, there will be a larger difference between the two methods. Nearest neighbour sampling will take the value closes to the point, but because of the high frequency, the actual point value may not be the same as the value of the closest neighbour.
+            Bilinear sampling will average the value over the four closest pixels, which may blur the high frequency, but result in a smoother, lower variance output.
         </p>
 
         <h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
 
+        <p>
+            Level sampling is ...
+            We implemented it for texture mapping using...
+        </p>
+        <p>
+            There are various tradeoffs between speed, memory usage, and antialiasing power between pixel sampling, level sampling, or number of samples per pixel.
+            Pixel sampling:
+            Level sampling:
+            Number of samples per pixel:
+        </p>
 
+        <div align="middle">
+            <table style="width=100%">
+                <tr>
+                    <td>
+                        <img src="images/task5_nn1.png" align="middle" width="400px" />
+                        <figcaption align="middle">texmap/test5.svg with sample rate 1, nearest neighbour sampling.</figcaption>
+                    </td>
+                    <td>
+                        <img src="images/task5_nn16.png" align="middle" width="400px" />
+                        <figcaption align="middle">texmap/test5.svg with sample rate 16, nearest neighbour sampling.</figcaption>
+                    </td>
+                </tr>
+                <br />
+                <tr>
+                    <td>
+                        <img src="images/task5_bl1.png" align="middle" width="400px" />
+                        <figcaption align="middle">texmap/test5.svg with sample rate 1, bilinear sampling.</figcaption>
+                    </td>
+                    <td>
+                        <img src="images/task5_bl16.png" align="middle" width="400px" />
+                        <figcaption align="middle">texmap/test5.svg with sample rate 16, bilinear sampling.</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
         <h2 align="middle">Section III: Art Competition</h2>
         <p>If you are not participating in the optional art competition, don't worry about this section!</p>
